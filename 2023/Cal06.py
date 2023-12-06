@@ -1,4 +1,6 @@
 import sys
+import time
+from aoc import printTime
 
 # Time:        41     77     70     96
 # Distance:   249   1362   1127   1011
@@ -12,9 +14,44 @@ def findRec(time, record) :
             wins += 1
     return wins
 
+def findRecOptimized(time, record) :
+    best = int(time / 2) # best I can do
+    wleft = findLowestLeftWin(0, best, time, record)
+    wright = findBiggestRightWin(best, time, time, record)
+    return wright - wleft + 1
+
+def findLowestLeftWin(tmin, tmax, time, record) :
+    # tmin loses
+    # tmax wins
+    while tmin + 1 < tmax :
+        tmiddle = int((tmin + tmax) / 2)
+        if (time - tmiddle) * tmiddle > record :
+            tmax = tmiddle
+        else :
+            tmin = tmiddle
+    return tmax
+
+def findBiggestRightWin(tmin, tmax, time, record) :
+    # tmin wins
+    # tmax loses
+    while tmin + 1 < tmax :
+        tmiddle = int((tmin + tmax) / 2)
+        if (time - tmiddle) * tmiddle > record :
+            tmin = tmiddle
+        else :
+            tmax = tmiddle
+    return tmin
+
 part1 = 1
 for t, r in data.items() :
     part1 *= findRec(t, r)
 print(part1)
 
+start_time = time.time_ns()
+print( findRecOptimized(41777096, 249136211271011) )
+printTime(time.time_ns() - start_time)
+
+start_time = time.time_ns()
 print( findRec(41777096, 249136211271011) )
+printTime(time.time_ns() - start_time)
+
