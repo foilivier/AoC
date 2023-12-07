@@ -1,5 +1,6 @@
 import sys
 import time
+import math
 
 def printTime(t_ns: int) -> None :
     if t_ns < 10_000 :
@@ -16,3 +17,14 @@ def printTime(t_ns: int) -> None :
                 t_sec = int(t_ns / 1_000_000_000)
                 print(f"--- {t_sec} seconds ---" )
 
+
+def solve2DegreeEquation(a: float, b: float, c: float) :
+    delta = (b * b) - (4.0 * a * c)
+    rdelta = math.sqrt(delta)
+    solutions = []
+    if delta == 0 :
+        solutions.append( -b / ( 2.0 * a) )
+    elif delta > 0 :
+        solutions.append( (-b - rdelta) / ( 2.0 * a) )
+        solutions.append( (-b + rdelta) / ( 2.0 * a) )
+    return solutions
