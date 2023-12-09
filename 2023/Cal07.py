@@ -28,9 +28,7 @@ def _getHandValue( counter ):
     handValue = 0
     vmax = max(counter.values())
     vlen = len(counter.values())
-    if   vlen == 5 and vmax == 1 : # 1 + 1 + 1 + 1 + 1 => High card
-        handValue = 1
-    elif vlen == 1 and vmax == 5 : # 5 => Five of a kind
+    if   vlen == 1 and vmax == 5 : # 5 => Five of a kind
         handValue = 7
     elif vlen == 2 and vmax == 4 : # 4 + 1 => Four of a kind
         handValue = 6
@@ -42,16 +40,18 @@ def _getHandValue( counter ):
         handValue = 3
     elif vlen == 4 and vmax == 2 : # 2 + 1 + 1 + 1 => One pair 
         handValue = 2
+    elif vlen == 5 and vmax == 1 : # 1 + 1 + 1 + 1 + 1 => High card
+        handValue = 1
     return handValue
 
 def getSortKey1(hand):
     value = getHandValue1(hand)
-    hand_comparable = hand.translate(str.maketrans("TJQKA","ABCDE"))
-    return f"{value}-{hand_comparable}"
+    hand_comparable = hand.translate(str.maketrans("TJQKA","ABCDE")) # to hexa (T=10=0xA=A, J=11=0xB=B, ...)
+    return f"{value}-{hand_comparable}" # hexadecimal & ASCII have same ordering 
 
 def getSortKey2(hand):
     value = getHandValue2(hand)
-    hand_comparable = hand.translate(str.maketrans("TJQKA","A0CDE"))
+    hand_comparable = hand.translate(str.maketrans("TJQKA","A0CDE"))# same as before but J(ack) value is 0
     return f"{value}-{hand_comparable}"
 
 def solve(games):

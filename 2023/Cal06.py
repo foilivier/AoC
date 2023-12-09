@@ -1,6 +1,8 @@
 import sys
 import time
+import math
 from aoc import printTime
+from aoc import solve2DegreeEquation
 
 # Time:        41     77     70     96
 # Distance:   249   1362   1127   1011
@@ -42,6 +44,18 @@ def findBiggestRightWin(tmin, tmax, time, record) :
             tmax = tmiddle
     return tmin
 
+def findRecOptimized2(time, record) :
+    # equation to solve : -x*x + Tx - R = 0
+    # a = -1 b = T c = -R
+    
+    low, high = solve2DegreeEquation( -1, time, -record )
+    if high < low : 
+        low, high = high, low
+    low =  math.ceil(low)
+    high =  math.floor(high)
+     
+    return high - low + 1
+
 part1 = 1
 for t, r in data.items() :
     part1 *= findRec(t, r)
@@ -49,6 +63,10 @@ print(part1)
 
 start_time = time.time_ns()
 print( findRecOptimized(41777096, 249136211271011) )
+printTime(time.time_ns() - start_time)
+
+start_time = time.time_ns()
+print( findRecOptimized2(41777096, 249136211271011) )
 printTime(time.time_ns() - start_time)
 
 start_time = time.time_ns()

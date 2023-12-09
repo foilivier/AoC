@@ -15,7 +15,7 @@ with open("inputs/2023/08.txt") as file :
     for l in file :
         line = l.rstrip('\n')
         if dirs is None :
-            dirs = list(map(lambda x : 0 if x == 'L' else 1, line )) # left = 0, right = 1, used as index
+            dirs = list(map(lambda x : "LR".find(x), line )) # left = 0, right = 1, used as index
         elif len(line) > 0 :
             m = re.match(r'(...) = \((...), (...)\)', line)
             key = m.group(1)
@@ -23,10 +23,11 @@ with open("inputs/2023/08.txt") as file :
             if (key[2] == 'A') :
                 ghostPos.append(key)
 
-def solve(pos, regex) :
+def solve(startPos, endNodeRE) :
     count = 0
+    pos = startPos
     for dir in cycle(dirs) :
-        if re.match(regex, pos) :
+        if re.match(endNodeRE, pos) :
             return count
         pos = network[pos][dir]
         count += 1
@@ -34,7 +35,7 @@ def solve(pos, regex) :
 print(solve('AAA', r'ZZZ'))
 
 # ghosts are cycling, just find the Least Common Multiple of all cycles
-counts = map(lambda pos : solve(pos, r'..Z'), ghostPos)
+counts = map(lambda startPos : solve(startPos, r'..Z'), ghostPos)
 print( math.lcm( *counts ) )
 
 end_ns = time.time_ns()

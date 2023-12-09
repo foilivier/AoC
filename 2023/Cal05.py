@@ -1,66 +1,67 @@
 import sys
 import re
+import time
 
 mapNames = {}
 maps = {}
 currentMap = None
-currentSection = None
+mapName = None
 seeds = None
 
 # read data
 with open("inputs/2023/05.txt") as file :
-    for lg in file :
-        line = lg.rstrip('\n')
+    for line in file :
         if line.strip() == "" :
             continue
         
-        match = re.match(r'^(.*?)( map)?: ?(.*)$', line)
+        match = re.match(r'^((.*) map|seeds): ?(.*)$', line)
         if match :
             # header
-            currentSection = match.group(1)
-            if currentSection == "seeds" :
+            if match.group(1) == "seeds" :
                 seeds = [int(x) for x in match.group(3).split()]
             else :
                 # map
+                mapName = match.group(2) 
                 currentMap = list()
-                maps[currentSection] = currentMap
-                tmp = currentSection.split("-")
+                maps[mapName] = currentMap
+                tmp = mapName.split("-") # source-to-dest
                 mapNames[tmp[0]] = tmp[2]
         else :
             # data
-            d = line.split()
-            currentMap.append( (int(d[1]), int(d[0]), int(d[2])) ) # source, dest, len
+            data = line.split()
+            currentMap.append( (int(data[1]), int(data[0]), int(data[2])) ) # tuple (source, dest, len)
 
 def getDest(map, value) :
-    for source, dest, len in map :
+    for source, dest, len in map : # map is a list of tuple (yep !)
         if source <= value <= source + len - 1 :
             return dest + value - source
     return value # unmapped => unchanged
 
-part1 = sys.maxsize
+start_time = time.time()
+
+part1 = []
 for seed in seeds :
-    currentSeed = seed
-    source = "seed"
-    while source in mapNames :
-        dest = mapNames[source]
-        mapName = source + "-to-" + dest
+    currentValue = seed
+    sourceType = "seed"
+    while sourceType in mapNames :
+        destType = mapNames[sourceType]
+        mapName = sourceType + "-to-" + destType
         cMap = maps[mapName]
-        currentSeed = getDest(cMap, currentSeed)
-        source = dest
-    part1 = min(part1, currentSeed)
+        currentValue = getDest(cMap, currentValue)
+        sourceType = destType
+    part1.append(currentValue)
+print(min(part1))
 
-print(part1)
-
-def findMin(start, end, source) :
+def findMin(start, end, sourceType) :
     
-    if not source in mapNames :
+    if not sourceType in mapNames :
         return start # end of recursion, return smallest (which is the start)
 
-    dest = mapNames[source]
-    mapName = source + "-to-" + dest
+    destType = mapNames[sourceType]
+    mapName = sourceType + "-to-" + destType
     cMap = maps[mapName]
 
-    bestMin = sys.maxsize
+    mins = []
     current = start
     while current <= end : # cover full range from start to end
         entryFound = False
@@ -73,19 +74,21 @@ def findMin(start, end, source) :
             if eSource <= current <= eEnd :
                 entryFound = True # this part of range is mapped
                 realEnd = min(end, eEnd) # mapped till the end or not ?
-                bestMin = min(bestMin, findMin(getDest(cMap, current), getDest(cMap, realEnd), dest))
+                mins.append(findMin(getDest(cMap, current), getDest(cMap, realEnd), destType))
                 current = realEnd + 1
                 break;
-        if not entryFound : # not mapped => get values until next range (nextMinStart)
-            bestMin = min(bestMin, findMin(getDest(cMap, current), getDest(cMap, min(end, nextMinStart - 1)), dest))
+        if not entryFound : # not mapped => get values until next range (nextMinStart-1 or end if shorter)
+            mins.append(findMin(getDest(cMap, current), getDest(cMap, min(end, nextMinStart - 1)), destType))
             current = nextMinStart;
 
-    return bestMin;
+    return min(mins);
 
-part2 = sys.maxsize
+part2 = []
 for idx in range(0, len(seeds), 2) :
     start = seeds[idx]
     lg = seeds[idx + 1]
     end = start + lg - 1 # inclusive
-    part2 = min(part2, findMin(start, end, "seed"))
-print(part2)
+    part2.append(findMin(start, end, "seed"))
+print(min(part2))
+
+print(f"--- {(time.time() - start_time) * 1000} milliseconds ---" )
