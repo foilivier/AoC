@@ -98,8 +98,8 @@ def solve() :
                 LOOP[y][x] = 'R'
 
     # 2 : paint it black ! (paint the outside)
-    for x in range(MAXX) :
-        for y in range(MAXY) :
+    for y in range(MAXY) :
+        for x in range(MAXX) :
             if LOOP[y][x] == 'R' :
                 paint(x, y, 'O') # paint it OUT as OUTSIDE but could also be INSIDE, we'll take care of that later
     
@@ -125,8 +125,8 @@ def solve() :
     else :
         part2 = IN # INSIDE is INSIDE
 
-    for y in range(MAXY) :
-        print( ''.join(LOOP[y]) )
+    # for y in range(MAXY) :
+    #     print( ''.join(LOOP[y]) )
 
     return (part1, part2)
 
@@ -140,7 +140,7 @@ def paint(xx, yy, color):
         x,y = todo.pop()
         if (0 <= x < MAXX and 0 <= y < MAXY ) : # check ranges
             v = LOOP[y][x]
-            if v == 'X' or v == color : # do not paint loop (X) aor already done
+            if v == 'X' or v == color : # part of LOOP (not to be painted) OR already done
                 continue
             LOOP[y][x] = color; # paint
             
