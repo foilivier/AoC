@@ -27,16 +27,16 @@ def solve(path, part) :
     res = 0
     # from top dir = v
     for x in range(MAXX) :
-        res = max(res, _solve(tiles, 'v', (x,0) ))
+        res = max(res, run(tiles, 'v', (x,0) ))
     # from bottom dir = ^
     for x in range(MAXX) :
-        res = max(res, _solve(tiles, '^', (x,MAXY-1) ))
+        res = max(res, run(tiles, '^', (x,MAXY-1) ))
     # from left dir = >
     for y in range(MAXY) :
-        res = max(res, _solve(tiles, '>', (0,y) ))
+        res = max(res, run(tiles, '>', (0,y) ))
     # from right dir = <
     for y in range(MAXY) :
-        res = max(res, _solve(tiles, '<', (MAXX-1,y) ))
+        res = max(res, run(tiles, '<', (MAXX-1,y) ))
     return res
 
 def run(tiles, dir, pos) :
@@ -44,7 +44,7 @@ def run(tiles, dir, pos) :
     beams = set() # cache (x,y,dir) 
     x,y = pos
     
-    # solve reflections on start position
+    # solve reflections on start position (from IN dir to OUT dir)
     reflections = REFLECTIONS.get( (dir,tiles[y][x]) )
     if reflections == None :
         reflections = (dir,) # do not change
@@ -62,7 +62,7 @@ def run(tiles, dir, pos) :
 
 def throwRay(tiles, beams, pos, dir) :
 
-    # ray arrives at new tile with direction
+    # ray goes OUT of tile at (x,y) in given direction
     x,y = pos
     d = dir
     
@@ -72,16 +72,16 @@ def throwRay(tiles, beams, pos, dir) :
             return # already done         
         beams.add(key)
         
-        # prepare next move
+        # prepare to move
         dx,dy = ADVANCE[d]
         nextX = x + dx
         nextY = y + dy
         if nextX < 0 or nextY < 0 or nextX >= MAXX or nextY >= MAXY :
             return # out of bounds
         next = tiles[nextY][nextX]
-        reflections = REFLECTIONS.get( (d,next) )
+        reflections = REFLECTIONS.get( (d,next) ) # from IN dir to OUT dir(s)
         if reflections == None :
-            reflections = (d,) # do not change
+            reflections = (d,) # direction does not change
         
         if len(reflections) == 1 :
             # continue following ray within this loop (too much recursion is bad)
@@ -90,6 +90,7 @@ def throwRay(tiles, beams, pos, dir) :
             # recurse
             for reflected in reflections :
                 throwRay(tiles, beams, (nextX, nextY), reflected)
+            break
 
 
 start_ns = time.time_ns()
